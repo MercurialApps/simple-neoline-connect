@@ -1,23 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import "./App.css";
 
 function App() {
+  const [neoline, setNeoLine] = useState();
+  const [neolineN3, setNeoLineN3] = useState();
+  const [account, setAccount] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    window.addEventListener("NEOLine.NEO.EVENT.READY", () => {
+      setNeoLine(new window.NEOLineN3.Init());
+    });
+    window.addEventListener("NEOLine.N3.EVENT.READY", () => {
+      setNeoLineN3(new window.NEOLineN3.Init());
+    });
+  }, []);
+
+  const initNeolineAccount = async () => {
+    try {
+      const { address } = await neoline.getAccount();
+      setAccount(address);
+    } catch (error) {
+      setError("Neoline not ready");
+      console.log(error);
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {neoline === undefined && <p>Loading neoline</p>}
+      {neoline && (
+        <button onClick={initNeolineAccount} color="pink" size="large">
+          Click to here connect to neoline
+        </button>
+      )}
     </div>
   );
 }
